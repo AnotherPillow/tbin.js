@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>tbin.js dev stuff</title>
+        <script type="module" src="tbin.js"></script>
+        <script>
+            const read = (file) => {
+                var reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                reader.onload = function() {
+                    var arrayBuffer = reader.result
+                    var bytes = new Uint8Array(arrayBuffer);
+                    const tb = new window.tBIN();
+                    tb.load(bytes).then((result) => {
+                        console.log(result)
+
+                        const propList = document.querySelector('#properties')
+                        tb.properties.all().forEach(key => {
+                            const val = tb.properties.get(key)
+                            const li = document.createElement('li')
+                            li.innerHTML = `<strong>${key}</strong>: <code>${val}</code>`
+                            propList.appendChild(li)
+                        });
+                        
+                        const sheetList = document.querySelector('#tilesheets')
+                        tb.tilesheets.all().forEach(sheet => {
+                            const li = document.createElement('li')
+                            li.innerHTML = `${sheet.displayName} (${sheet.filename}) - tiles: ${sheet.tileHeight}*${sheet.tileWidth}, image: ${sheet.sheetPixelWidth}x${sheet.sheetPixelHeight} - ${sheet.tileProperties.length} properties`
+                            sheetList.appendChild(li)
+                        })
+                    })
+                }
+            }
+            const onFile = (e) => {
+                const files = e.target.files
+                const blob = files[0]
+                read(blob)
+            }
+        </script>
+    </head>
+    <body>
+        <label>
+            Upload tbin:
+            <input type="file" onchange="onFile(event)"/>
+        </label>
+        <ul id="properties">
+            <li><h2>map properties</h2></li>
+        </ul>
+        <hr />
+        <ul id="tilesheets">
+            <li><h2>tilesheets</h2></li>
+        </ul>
+    </body>
+</html>
