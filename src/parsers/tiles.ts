@@ -32,25 +32,18 @@ export class tBINTiles {
     constructor(private bytes: Uint16Array, private tilesStartIndex: number) {
         let p = tilesStartIndex;
         this.tileLayerCount = this.bytes[p]
-        console.log(`there are ${this.tileLayerCount} layers`)
 
         let lastTileElementType: 0x54 | 0x53 | 0x4E | 0x41 | null = null
         
         for (let i = 0; i < this.tileLayerCount; i++) {
-            console.log(i, this.tileLayerCount, p, this.bytes.length)
             if (p >= this.bytes.length) break;
-            console.log('a', p, p.toString(16), i, '0x' + (lastTileElementType ?? 0).toString(16))
             const layer_name_length = this.bytes[p += (lastTileElementType == 0x4E ? 1 : 4)]
-            console.log('b', layer_name_length, p, p.toString(16))
             p += 3;
 
             let layer_name = ''
             for (let c = 0; c < layer_name_length; c++) {
                 layer_name += String.fromCharCode(this.bytes[++p])
             }
-
-            console.log('c', `layer: ${layer_name}`)
-            debugger;
 
             let layer_visible = this.bytes[++p] > 0
             let layer_width_in_tiles = this.bytes[p += 5]
@@ -71,7 +64,6 @@ export class tBINTiles {
                 let x = 0;
                 // for (let x = 0; x < layer_width_in_tiles; x++) {
                 do {
-                    console.log('xy', x, y, p.toString(16))
                     const tileType = this.bytes[++p]
                     lastTileElementType = tileType as any
                     if (!tiles[y][x]) tiles[y][x] = null
@@ -80,10 +72,11 @@ export class tBINTiles {
                             const sheet_name_len = this.bytes[++p]
                             currentSheet = ''
                             p += 3;
+                            
                             for (let c = 0; c < sheet_name_len; c++) {
                                 currentSheet += String.fromCharCode(this.bytes[++p])
                             }
-                            // console.log(`layer: ${layer_name} sheet: ${currentSheet}`)
+
                             break;
                         case 0x53: // 'S'
                             const index = this.bytes[++p]
@@ -111,8 +104,6 @@ export class tBINTiles {
                                 }
 
                                 s_tile.properties.set(key, val)
-
-                                console.log(`x/y - ${x}/${y} tiledata; ${key}->${val}`)
                             }
 
                             tiles[y][x] = s_tile
@@ -142,10 +133,11 @@ export class tBINTiles {
                                             const sheet_name_len = this.bytes[++p]
                                             currentTilesheet_anim = ''
                                             p += 3;
+                                            
                                             for (let c = 0; c < sheet_name_len; c++) {
                                                 currentTilesheet_anim += String.fromCharCode(this.bytes[++p])
                                             }
-                                            // console.log(`layer: ${layer_name} sheet: ${currentSheet}`)
+                                            
                                             break;
                                         case 0x53: // 'S'
                                             const index = this.bytes[++p]
@@ -174,7 +166,6 @@ export class tBINTiles {
 
                                                 a_sTile.properties.set(key, val)
                 
-                                                // console.log(`x/y - ${x}/${y} tiledata; ${key}->${val}`)
                                                 ++i;
                                             }
 
@@ -197,7 +188,7 @@ export class tBINTiles {
                     }
                 } while (x < layer_width_in_tiles && p < this.bytes.length)
                 
-                    // remove the empty elements and replace them with null
+                // remove the empty elements and replace them with null
                 tiles[y] = Array.from(tiles[y], i => i ?? null)
                 
                 // fill in not-filled elements at the end with null
