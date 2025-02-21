@@ -1,6 +1,6 @@
 export class tBINTileProperty {
 
-    public KEY_REGEX = /@TileIndex@(\d+)@([a-zA-Z0-9]+)/
+    public KEY_REGEX: RegExp = /@TileIndex@(\d+)@([a-zA-Z0-9]+)/
 
     public tileIndex: number;
     public key: string;
@@ -24,7 +24,7 @@ export class tBINTilesheets {
     public tilesheets: tBINTilesheet[] = []
     public tilesheetsEnd: number;
 
-    all = () => this.tilesheets
+    all = (): tBINTilesheet[] => this.tilesheets
 
     constructor(private bytes: Uint16Array, private tilesheetsStartIndex: number) {
         let p = tilesheetsStartIndex

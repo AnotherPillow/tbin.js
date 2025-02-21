@@ -6,10 +6,11 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.7.3"
   },
   "scripts": {
-    "build": "bun run build.ts",
+    "build": "bun run build.ts && bun run build:declarations",
+    "build:declarations": "tsc -p tsconfig.dts.json",
     "dev": "bun run dev/index.ts"
   }
 }

@@ -7,9 +7,9 @@ entrypoints = entrypoints.map((x) => sourceDirectory + x);
 console.log("Compiling " + entrypoints.length + " typescript files...");
 
 const results = await Bun.build({
-  entrypoints: entrypoints,
-  publicPath: "",
-  sourcemap: "inline",
-  outdir: './build',
-  plugins: [],
+    entrypoints: entrypoints,
+    publicPath: "",
+    sourcemap: "inline",
+    outdir: './build',
+    plugins: [],
 });

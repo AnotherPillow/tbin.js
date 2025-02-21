@@ -1,7 +1,7 @@
 import arrayCompare from "../helpers/arrayCompare"
 
 export class tBINMeta {
-    public TBIN_FORMAT_BYTES = new Uint16Array([0x74, 0x42, 0x49, 0x4E])
+    public TBIN_FORMAT_BYTES: Uint16Array = new Uint16Array([0x74, 0x42, 0x49, 0x4E])
     public selfMapName: string | null = null;
     private selfMapNameLength: number;
     

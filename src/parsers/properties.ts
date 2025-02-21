@@ -28,7 +28,7 @@ export class tBINProperties {
         this.propertiesEnd = p;
     }
 
-    get = (key: string) => this.propertyDictionary[key]
-    set = (key: string, value: string) => this.propertyDictionary[key] = value
-    all = () => Object.keys(this.propertyDictionary)
+    get = (key: string): string => this.propertyDictionary[key]
+    set = (key: string, value: string): string => this.propertyDictionary[key] = value
+    all = (): string[] => Object.keys(this.propertyDictionary)
 }

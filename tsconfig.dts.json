@@ -5,16 +5,18 @@
       "module": "ESNext",
       "moduleDetection": "force",
       "jsx": "react-jsx",
-      "outDir": "./build",
       "moduleResolution": "bundler",
       "allowImportingTsExtensions": true,
-      "verbatimModuleSyntax": true,
-      "noEmit": true,
+      "declaration": true,
+      "emitDeclarationOnly": true,
+      "outFile": "./build/index.d.ts", // Single output file
       "strict": true,
       "skipLibCheck": true,
       "noFallthroughCasesInSwitch": true,
       "noUnusedLocals": false,
       "noUnusedParameters": false,
       "noPropertyAccessFromIndexSignature": false
-    }
+    },
+    "include": ["./src/index.ts"] // Only include the entry point
   }
+  
