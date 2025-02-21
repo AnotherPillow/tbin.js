@@ -5,6 +5,8 @@ import { tBINTiles } from "./parsers/tiles";
 import { tBINTilesheets } from "./parsers/tilesheets";
 import type { tBINParseResult } from "./types";
 
+import * as exportAs from './export/index'
+
 export class tBIN { // tiled says tBIN so I say tBIN
     constructor() {}
     public buffer: ArrayBuffer = new ArrayBuffer();
@@ -32,6 +34,18 @@ export class tBIN { // tiled says tBIN so I say tBIN
         // debugger;
 
         return {}
+    }
+
+    export(type: 'tmx') {
+        if (this.bytes.length == 0) return '';
+        let exporter;
+        switch (type) {
+            case 'tmx':
+                exporter = new exportAs.ExportTMX()
+                break;
+            default: 
+                return ''
+        }
     }
 }
 
