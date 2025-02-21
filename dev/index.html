@@ -30,6 +30,13 @@
                             li.innerHTML = `${sheet.displayName} (${sheet.filename}) - tiles: ${sheet.tileHeight}*${sheet.tileWidth}, image: ${sheet.sheetPixelWidth}x${sheet.sheetPixelHeight} - ${sheet.tileProperties.length} properties`
                             sheetList.appendChild(li)
                         })
+
+                        const layerList = document.querySelector('#layers')
+                        tb.tiles.layers.forEach((layer, i) => {
+                            const li = document.createElement('li')
+                            li.innerHTML = `layer ${i}: ${layer.name} (visible: ${layer.visible}) - w/h ${layer.widthTiles}/${layer.heightTiles}`
+                            layerList.appendChild(li)
+                        })
                     })
                 }
             }
@@ -51,6 +58,10 @@
         <hr />
         <ul id="tilesheets">
             <li><h2>tilesheets</h2></li>
+        </ul>
+        <hr />
+        <ul id="layers">
+            <li><h2>layers</h2></li>
         </ul>
     </body>
 </html>

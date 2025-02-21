@@ -5,8 +5,8 @@ export class tBINMeta {
     public selfMapName: string | null = null;
     private selfMapNameLength: number;
     
-    public propertiesStartIndex: number = -1;
-    public propertiesCount: number = 0;
+    public propertiesStartIndex: number;
+    public propertiesCount: number;
 
     constructor(private bytes: Uint16Array) {
         this.selfMapNameLength = this.bytes[6]

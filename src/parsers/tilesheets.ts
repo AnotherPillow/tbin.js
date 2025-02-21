@@ -22,6 +22,7 @@ export class tBINTilesheet {
 export class tBINTilesheets {
     public tilesheetCount: number;
     public tilesheets: tBINTilesheet[] = []
+    public tilesheetsEnd: number;
 
     all = () => this.tilesheets
 
@@ -91,5 +92,6 @@ export class tBINTilesheets {
             this.tilesheets.push(sheet)   
             p++;
         }
+        this.tilesheetsEnd = p
     }
 }

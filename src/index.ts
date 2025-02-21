@@ -1,6 +1,7 @@
 import arrayCompare from "./helpers/arrayCompare";
 import { tBINMeta } from "./parsers/metadata";
 import { tBINProperties } from "./parsers/properties";
+import { tBINTiles } from "./parsers/tiles";
 import { tBINTilesheets } from "./parsers/tilesheets";
 import type { tBINParseResult } from "./types";
 
@@ -12,6 +13,7 @@ export class tBIN { // tiled says tBIN so I say tBIN
     private meta: tBINMeta | undefined;
     private properties: tBINProperties | undefined;
     private tilesheets: tBINTilesheets| undefined;
+    private tiles: tBINTiles | undefined;
 
     async load(_ab: ArrayBuffer): Promise<tBINParseResult> {
         this.buffer = _ab
@@ -19,8 +21,7 @@ export class tBIN { // tiled says tBIN so I say tBIN
         this.meta = new tBINMeta(this.bytes)
         this.properties = new tBINProperties(this.bytes, this.meta.propertiesStartIndex, this.meta.propertiesCount)
         this.tilesheets = new tBINTilesheets(this.bytes, this.properties.propertiesEnd)
-
-        // NOTE TO SELF: search for 280000001E000000 in grandpasshedoutside for layout of thing (40, 30, 16, 16)
+        this.tiles = new tBINTiles(this.bytes, this.tilesheets.tilesheetsEnd)
 
         if (!this.meta.validiateTbin()) {
             return {
@@ -28,11 +29,10 @@ export class tBIN { // tiled says tBIN so I say tBIN
             }
         }
 
-        debugger;
+        // debugger;
 
         return {}
     }
-
 }
 
 //@ts-ignore
