@@ -16,6 +16,7 @@ export class tBINTileProperty {
         this.tileIndex = Number(s_index)
     }
 
+    // TODO: make generic class for these
     private parseValue(value: any, type: TilePropertyType): boolean | number | string {
         switch (type) {
             case 'string':

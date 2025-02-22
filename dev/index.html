@@ -34,7 +34,7 @@
                         const layerList = document.querySelector('#layers')
                         tb.tiles.layers.forEach((layer, i) => {
                             const li = document.createElement('li')
-                            li.innerHTML = `layer ${i}: ${layer.name} (visible: ${layer.visible}) - w/h ${layer.widthTiles}/${layer.heightTiles}`
+                            li.innerHTML = `layer ${i}: ${layer.name} (visible: ${layer.visible}) - w/h ${layer.widthTiles}/${layer.heightTiles} - ${layer.properties.size} properties`
                             layerList.appendChild(li)
                         })
                         
