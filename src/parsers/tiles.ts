@@ -1,15 +1,18 @@
 export class tBINTile {
+    public type: 'static' | 'animated' | '' = ''
     public properties: Map<string, string> = new Map();
     constructor() {}
 }
 
 export class tBINStaticTile extends tBINTile {
+    public type: 'static' = 'static' as 'static'
     constructor(public indexOnSheet: number, public blendMode: number, public tilesheetName: string) {
         super()
     }
 }
 
 export class tBINAnimatedTile extends tBINTile {
+    public type: 'animated' = 'animated' as 'animated'
     constructor(public frameInterval: number, public frameCount: number) {
         super()
     }
@@ -30,6 +33,7 @@ export class tBINTiles {
     public layers: tBINLayer[] = [];
 
     constructor(private bytes: Uint16Array, private tilesStartIndex: number) {
+        console.log(`tiles start ${tilesStartIndex} (0x${tilesStartIndex.toString(16)})`)
         let p = tilesStartIndex;
         this.tileLayerCount = this.bytes[p]
 
@@ -44,6 +48,8 @@ export class tBINTiles {
             for (let c = 0; c < layer_name_length; c++) {
                 layer_name += String.fromCharCode(this.bytes[++p])
             }
+
+            console.log(`layer ${i}. name length: ${layer_name_length} - name: ${layer_name}. name finished at ${p} (0x${p.toString(16)})`)
 
             let layer_visible = this.bytes[++p] > 0
             let layer_width_in_tiles = this.bytes[p += 5]
@@ -64,6 +70,7 @@ export class tBINTiles {
                 let x = 0;
                 // for (let x = 0; x < layer_width_in_tiles; x++) {
                 do {
+                    console.log(`doing tile x/y ${x}${y}`)
                     const tileType = this.bytes[++p]
                     lastTileElementType = tileType as any
                     if (!tiles[y][x]) tiles[y][x] = null
@@ -79,11 +86,14 @@ export class tBINTiles {
 
                             break;
                         case 0x53: // 'S'
-                            const index = this.bytes[++p]
-                            const blendMode = this.bytes[++p] // no idea what this does, but tiled references it!
+                            const s_index_b0 = this.bytes[++p]
+                            const s_index_b1 = this.bytes[++p]
+                            const index = (s_index_b1 << 8) | s_index_b0
+
+                            const blendMode = this.bytes[p += 3] // no idea what this does, but tiled references it!
                             const s_tile = new tBINStaticTile(index, blendMode, currentSheet);
                             
-                            const prop_count = this.bytes[p += 4]
+                            const prop_count = this.bytes[++p]
                             if (prop_count > 0) {
                                 // need to figure out ones with multiple properties
                                 const key_len = this.bytes[p += 4]

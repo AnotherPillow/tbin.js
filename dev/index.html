@@ -37,6 +37,20 @@
                             li.innerHTML = `layer ${i}: ${layer.name} (visible: ${layer.visible}) - w/h ${layer.widthTiles}/${layer.heightTiles}`
                             layerList.appendChild(li)
                         })
+                        
+                        const exportTmxBtn = document.querySelector('#export-tmx-button')
+                        const downloadTmxBtn = document.querySelector('#tmx-download')
+                        let tmxstring = ''
+                        
+                        exportTmxBtn.addEventListener('click', () => {
+                            tmxstring = tb.export('tmx')
+                            console.log(tmxstring)
+                            document.querySelector('#export-tmx-output-text').value = tmxstring
+                            console.log(tmxstring.length)
+
+                            downloadTmxBtn.href = `data:application/xml;charset=utf-8,${encodeURIComponent(tmxstring)}`
+                        })
+                        
                     })
                 }
             }
@@ -63,5 +77,12 @@
         <ul id="layers">
             <li><h2>layers</h2></li>
         </ul>
+        <hr>
+        <h2>export</h2>
+        <button id="export-tmx-button">export as tmx</button>
+        <br>
+        <textarea id="export-tmx-output-text" rows="20" cols="125"></textarea>
+        <br>
+        <a id="tmx-download" download="converted-from-tbin.tmx">download tmx</a>
     </body>
 </html>
