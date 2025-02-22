@@ -1,17 +1,33 @@
+import type { TilePropertyType } from "../types";
+
 export class tBINTileProperty {
 
     public KEY_REGEX: RegExp = /@TileIndex@(\d+)@([a-zA-Z0-9]+)/
 
     public tileIndex: number;
     public key: string;
-    public value: string;
+    public value: boolean | number | string;
 
-    constructor(public rawKey: string, _value: string) {
+    constructor(public rawKey: string, _value: boolean | number | string, public type: TilePropertyType) {
         const [ _, s_index, _key ] = rawKey.match(this.KEY_REGEX)! // let's hope it isn't null
         
-        this.tileIndex = Number(s_index)
         this.key = _key
-        this.value = _value
+        this.value = this.parseValue(_value, type);
+        this.tileIndex = Number(s_index)
+    }
+
+    // TODO: make generic class for these
+    private parseValue(value: any, type: TilePropertyType): boolean | number | string {
+        switch (type) {
+            case 'string':
+                return value.toString();
+            case 'bool':
+                return value > 0
+            case 'float':
+                return parseFloat(value.toString())
+            case 'int':
+                return Number(value.toString())
+        }
     }
 }
 
@@ -64,8 +80,9 @@ export class tBINTilesheets {
 
             const properties: tBINTileProperty[] = []
 
-            for (let j = 0; j < properties_count; j++) {
+            propertyLoop: for (let j = 0; j < properties_count; j++) {
                 const key_len = this.bytes[++p]
+                console.log(key_len, p, p.toString(16))
                 p += 3;
                 
                 let key = ''
@@ -73,16 +90,59 @@ export class tBINTilesheets {
                     key += String.fromCharCode(this.bytes[++p])
                 }
 
-                const gap = this.bytes[++p]
-                const value_len = this.bytes[++p]
-                p += gap;
+                console.log(key)
 
-                let value = ''
-                for (let c = 0; c < value_len; c++) {
-                    value += String.fromCharCode(this.bytes[++p])
+                const type_int = this.bytes[++p]
+                let type_str: TilePropertyType = '' as TilePropertyType
+                switch (type_int) {
+                    case 0:
+                        type_str = 'bool'
+                        break;
+                    case 1:
+                        type_str = 'int'
+                        break;
+                    case 2:
+                        type_str = 'float'
+                        break;
+                    case 3:
+                        type_str = 'string'
+                        break;
+                    default:
+                        type_str  = 'int' // AAAAAAAAAAAAAAAAAAAAAAAAAA
+                        break;
+                }
+                console.log(type_int, type_str)
+                
+                let value = (type_str == 'string' ? '' : 0)
+                
+                switch (type_str) {
+                    case 'string':
+                        const value_len = this.bytes[++p]
+                        p+=3;
+                        for (let c = 0; c < value_len; c++) {
+                            value += String.fromCharCode(this.bytes[++p])
+                        }
+                        break;
+                    case 'bool': // will always be a uint8
+                        value = this.bytes[++p]
+                        break;
+                    case 'float': // idk how do I aprse a float?
+                        alert('hi! this map contains tiledata not yet supported. please contact the developer with the map please thank you')
+                        continue propertyLoop;
+                        break;
+                    case 'int': // technically uint32, but that's a later time deal
+                        const int_value_b0 = this.bytes[++p]
+                        const int_value_b1 = this.bytes[++p]
+                        const int_value = (int_value_b1<< 8) | int_value_b0
+                        value = int_value
+                        break;
+                    default: // no it's not
+                        break;
                 }
 
-                properties.push(new tBINTileProperty(key, value))
+                console.log(value)
+                
+                properties.push(new tBINTileProperty(key, value, type_str))
             }
 
             const sheet = new tBINTilesheet(
@@ -91,6 +151,7 @@ export class tBINTilesheets {
 
             this.tilesheets.push(sheet)   
             p++;
+            console.log(`finish sheet: ${p} (0x${p.toString(16)})`)
         }
         this.tilesheetsEnd = p
     }

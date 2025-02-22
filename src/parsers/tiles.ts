@@ -1,15 +1,20 @@
+import type { TilePropertyType } from "../types";
+
 export class tBINTile {
+    public type: 'static' | 'animated' | '' = ''
     public properties: Map<string, string> = new Map();
     constructor() {}
 }
 
 export class tBINStaticTile extends tBINTile {
+    public type: 'static' = 'static' as 'static'
     constructor(public indexOnSheet: number, public blendMode: number, public tilesheetName: string) {
         super()
     }
 }
 
 export class tBINAnimatedTile extends tBINTile {
+    public type: 'animated' = 'animated' as 'animated'
     constructor(public frameInterval: number, public frameCount: number) {
         super()
     }
@@ -23,6 +28,21 @@ export class tBINLayer {
      */
     public tiles: (tBINTile | null)[][] = []
     constructor(public name: string, public widthTiles: number, public heightTiles: number, public visible: boolean, public tileWidthPixels: number, public tileHeightPixels: number) {}
+
+    public properties: Map<string, boolean | number | string> = new Map();
+    
+    public _parsePropertyValue(value: any, type: TilePropertyType): boolean | number | string {
+        switch (type) {
+            case 'string':
+                return value.toString();
+            case 'bool':
+                return value > 0
+            case 'float':
+                return parseFloat(value.toString())
+            case 'int':
+                return Number(value.toString())
+        }
+    }
 }
 
 export class tBINTiles {
@@ -30,6 +50,7 @@ export class tBINTiles {
     public layers: tBINLayer[] = [];
 
     constructor(private bytes: Uint16Array, private tilesStartIndex: number) {
+        console.log(`tiles start ${tilesStartIndex} (0x${tilesStartIndex.toString(16)})`)
         let p = tilesStartIndex;
         this.tileLayerCount = this.bytes[p]
 
@@ -45,15 +66,91 @@ export class tBINTiles {
                 layer_name += String.fromCharCode(this.bytes[++p])
             }
 
+            console.log(`layer ${i}. name length: ${layer_name_length} - name: ${layer_name}. name finished at ${p} (0x${p.toString(16)})`)
+
             let layer_visible = this.bytes[++p] > 0
             let layer_width_in_tiles = this.bytes[p += 5]
             let layer_height_in_tiles = this.bytes[p += 4]
             let tile_width_pixels = this.bytes[p += 4]
             let tile_height_pixels = this.bytes[p += 4]
+            let layer_property_count = this.bytes[p += 4]
 
             const layer = new tBINLayer(layer_name, layer_width_in_tiles, layer_height_in_tiles, layer_visible, tile_width_pixels, tile_height_pixels)
             
-            p += 7
+            p += 3
+            if (layer_property_count > 0) {
+                
+
+                propertyLoop: for (let j = 0; j < layer_property_count; j++) {
+                    const key_len = this.bytes[++p]
+                    console.log(key_len, p, p.toString(16))
+                    p += 3;
+                    
+                    let key = ''
+                    for (let c = 0; c < key_len; c++) {
+                        key += String.fromCharCode(this.bytes[++p])
+                    }
+    
+                    console.log(key)
+    
+                    const type_int = this.bytes[++p]
+                    let type_str: TilePropertyType = '' as TilePropertyType
+                    switch (type_int) {
+                        case 0:
+                            type_str = 'bool'
+                            break;
+                        case 1:
+                            type_str = 'int'
+                            break;
+                        case 2:
+                            type_str = 'float'
+                            break;
+                        case 3:
+                            type_str = 'string'
+                            break;
+                        default:
+                            type_str  = 'int' // AAAAAAAAAAAAAAAAAAAAAAAAAA
+                            break;
+                    }
+                    console.log(type_int, type_str)
+                    
+                    let value = (type_str == 'string' ? '' : 0)
+                    
+                    switch (type_str) {
+                        case 'string':
+                            const value_len = this.bytes[++p]
+                            p+=3;
+                            for (let c = 0; c < value_len; c++) {
+                                value += String.fromCharCode(this.bytes[++p])
+                            }
+                            break;
+                        case 'bool': // will always be a uint8
+                            value = this.bytes[++p]
+                            break;
+                        case 'float': // idk how do I aprse a float?
+                            alert('hi! this map contains layer properties not yet supported. please contact the developer with the map please thank you')
+                            continue propertyLoop;
+                            break;
+                        case 'int': // technically uint32, but that's a later time deal
+                            const int_value_b0 = this.bytes[++p]
+                            const int_value_b1 = this.bytes[++p]
+                            const int_value = (int_value_b1<< 8) | int_value_b0
+                            value = int_value
+                            break;
+                        default: // no it's not
+                            break;
+                    }
+    
+                    console.log(value)
+                    
+                    layer.properties.set(
+                        key,
+                        layer._parsePropertyValue(value, type_str)
+                    )
+                }
+
+                
+            }
 
             let tiles: (tBINTile | null)[][] = []
             let currentSheet = ''
@@ -64,6 +161,7 @@ export class tBINTiles {
                 let x = 0;
                 // for (let x = 0; x < layer_width_in_tiles; x++) {
                 do {
+                    console.log(`doing tile x/y ${x}${y}`)
                     const tileType = this.bytes[++p]
                     lastTileElementType = tileType as any
                     if (!tiles[y][x]) tiles[y][x] = null
@@ -79,11 +177,14 @@ export class tBINTiles {
 
                             break;
                         case 0x53: // 'S'
-                            const index = this.bytes[++p]
-                            const blendMode = this.bytes[++p] // no idea what this does, but tiled references it!
+                            const s_index_b0 = this.bytes[++p]
+                            const s_index_b1 = this.bytes[++p]
+                            const index = (s_index_b1 << 8) | s_index_b0
+
+                            const blendMode = this.bytes[p += 3] // no idea what this does, but tiled references it!
                             const s_tile = new tBINStaticTile(index, blendMode, currentSheet);
                             
-                            const prop_count = this.bytes[p += 4]
+                            const prop_count = this.bytes[++p]
                             if (prop_count > 0) {
                                 // need to figure out ones with multiple properties
                                 const key_len = this.bytes[p += 4]

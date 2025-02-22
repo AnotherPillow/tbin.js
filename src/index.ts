@@ -5,15 +5,18 @@ import { tBINTiles } from "./parsers/tiles";
 import { tBINTilesheets } from "./parsers/tilesheets";
 import type { tBINParseResult } from "./types";
 
+import * as exportAs from './export/index'
+import type { tBINExporter } from "./export/exporter";
+
 export class tBIN { // tiled says tBIN so I say tBIN
     constructor() {}
     public buffer: ArrayBuffer = new ArrayBuffer();
     public bytes: Uint16Array = new Uint16Array();
 
-    private meta: tBINMeta | undefined;
-    private properties: tBINProperties | undefined;
-    private tilesheets: tBINTilesheets| undefined;
-    private tiles: tBINTiles | undefined;
+    public meta: tBINMeta | undefined;
+    public properties: tBINProperties | undefined;
+    public tilesheets: tBINTilesheets| undefined;
+    public tiles: tBINTiles | undefined;
 
     async load(_ab: ArrayBuffer): Promise<tBINParseResult> {
         this.buffer = _ab
@@ -32,6 +35,21 @@ export class tBIN { // tiled says tBIN so I say tBIN
         // debugger;
 
         return {}
+    }
+
+    export(type: 'tmx'): string {
+        if (this.bytes.length == 0) return '';
+        let exporter: tBINExporter;
+        switch (type) {
+            case 'tmx':
+                exporter = new exportAs.ExportTMX(this)
+                break;
+            default: 
+                return ''
+        }
+
+        const output = exporter.export()
+        return output
     }
 }
 
