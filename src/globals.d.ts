@@ -8,5 +8,5 @@ declare global {
 }
 
 declare global {
-    var tBIN: any;
+    var tBIN: tBIN;
 }

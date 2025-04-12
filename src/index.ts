@@ -53,5 +53,8 @@ export class tBIN { // tiled says tBIN so I say tBIN
     }
 }
 
+
+//@ts-ignore
+var window: Window = window ?? {}
 //@ts-ignore
 window.tBIN = globalThis.tBIN = tBIN

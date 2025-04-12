@@ -1,4 +1,4 @@
-import type { tBINAnimatedTile, tBINStaticTile } from "parsers/tiles";
+import type { tBINAnimatedTile, tBINStaticTile } from "../parsers/tiles";
 import { tBIN } from "../index";
 import { tBINExporter } from "./exporter"
 
@@ -129,7 +129,7 @@ export class ExportTMX extends tBINExporter{
                             objectElement.setAttribute('width', layer.tileWidthPixels.toString())
 
                             const o_propertiesElement = xml.createElement('properties')
-                            tile.properties.forEach((value, key) => {
+                            tile.properties.forEach((value: any, key: any) => { // value comes first in Map.prototype.forEach
                                 const o_propertyElement = xml.createElement('property')
                                 o_propertyElement.setAttribute('name', key)
                                 o_propertyElement.setAttribute('value', value)
