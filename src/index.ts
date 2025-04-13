@@ -33,7 +33,7 @@ export class tBIN { // tiled says tBIN so I say tBIN
         this.tilesheets = new tBINTilesheets(this.bytes, this.properties.propertiesEnd)
         this.tiles = new tBINTiles(this.bytes, this.tilesheets.tilesheetsEnd)
 
-        debugger;
+        // debugger;
 
         return {}
     }

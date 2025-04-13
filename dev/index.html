@@ -17,6 +17,7 @@
                         console.log(result)
 
                         const propList = document.querySelector('#properties')
+                        propList.innerHTML = ''
                         tb.properties.all().forEach(key => {
                             const val = tb.properties.get(key)
                             const li = document.createElement('li')
@@ -25,6 +26,7 @@
                         });
                         
                         const sheetList = document.querySelector('#tilesheets')
+                        sheetList.innerHTML = ''
                         tb.tilesheets.all().forEach(sheet => {
                             const li = document.createElement('li')
                             li.innerHTML = `${sheet.displayName} (${sheet.filename}) - tiles: ${sheet.tileHeight}*${sheet.tileWidth}, image: ${sheet.sheetPixelWidth}x${sheet.sheetPixelHeight} - ${sheet.tileProperties.length} properties`
@@ -32,6 +34,7 @@
                         })
 
                         const layerList = document.querySelector('#layers')
+                        layerList.innerHTML = ''
                         tb.tiles.layers.forEach((layer, i) => {
                             const li = document.createElement('li')
                             li.innerHTML = `layer ${i}: ${layer.name} (visible: ${layer.visible}) - w/h ${layer.widthTiles}/${layer.heightTiles} - ${layer.properties.size} properties`
