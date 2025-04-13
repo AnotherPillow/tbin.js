@@ -163,7 +163,7 @@ export class tBINTiles {
                 let x = 0;
                 // for (let x = 0; x < layer_width_in_tiles; x++) {
                 do {
-                    console.log(`doing tile x/y ${x}${y}`)
+                    // console.log(`doing tile x/y ${x}${y}`)
                     const tileType = this.bytes[++p]
                     lastTileElementType = tileType as any
                     if (!tiles[y][x]) tiles[y][x] = null

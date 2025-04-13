@@ -10,7 +10,7 @@ import type { tBINExporter } from "./export/exporter";
 
 export class tBIN { // tiled says tBIN so I say tBIN
     constructor() {}
-    public buffer: ArrayBuffer = new ArrayBuffer();
+    public buffer: ArrayBuffer | Uint8Array = new ArrayBuffer();
     public bytes: Uint16Array = new Uint16Array();
 
     public meta: tBINMeta | undefined;
@@ -18,7 +18,7 @@ export class tBIN { // tiled says tBIN so I say tBIN
     public tilesheets: tBINTilesheets| undefined;
     public tiles: tBINTiles | undefined;
 
-    async load(_ab: ArrayBuffer): Promise<tBINParseResult> {
+    async load(_ab: ArrayBuffer | Uint8Array): Promise<tBINParseResult> {
         this.buffer = _ab
         this.bytes = new Uint16Array(this.buffer)
         this.meta = new tBINMeta(this.bytes)
