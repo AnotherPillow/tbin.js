@@ -22,17 +22,18 @@ export class tBIN { // tiled says tBIN so I say tBIN
         this.buffer = _ab
         this.bytes = new Uint16Array(this.buffer)
         this.meta = new tBINMeta(this.bytes)
-        this.properties = new tBINProperties(this.bytes, this.meta.propertiesStartIndex, this.meta.propertiesCount)
-        this.tilesheets = new tBINTilesheets(this.bytes, this.properties.propertiesEnd)
-        this.tiles = new tBINTiles(this.bytes, this.tilesheets.tilesheetsEnd)
-
+        
         if (!this.meta.validiateTbin()) {
             return {
                 error: 'NOT_TBIN'
             }
         }
+        
+        this.properties = new tBINProperties(this.bytes, this.meta.propertiesStartIndex, this.meta.propertiesCount)
+        this.tilesheets = new tBINTilesheets(this.bytes, this.properties.propertiesEnd)
+        this.tiles = new tBINTiles(this.bytes, this.tilesheets.tilesheetsEnd)
 
-        // debugger;
+        debugger;
 
         return {}
     }

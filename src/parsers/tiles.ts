@@ -55,10 +55,14 @@ export class tBINTiles {
         this.tileLayerCount = this.bytes[p]
 
         let lastTileElementType: 0x54 | 0x53 | 0x4E | 0x41 | null = null
+        let lastElementHadProperties: boolean = false
         
         for (let i = 0; i < this.tileLayerCount; i++) {
             if (p >= this.bytes.length) break;
-            const layer_name_length = this.bytes[p += (lastTileElementType == 0x4E ? 1 : 4)]
+            const layer_name_length_start_point = p += lastTileElementType == 0x4E || lastElementHadProperties ? 1 : 4
+            const layer_name_length = this.bytes[layer_name_length_start_point]
+            console.log(`layer ${i}. starting new @ layer_name_length_start_point: ${layer_name_length_start_point} (0x${layer_name_length_start_point.toString(16)}) - layer name length: ${layer_name_length}. p increase was ${this.bytes[p - 5] == 0x4E ? 1 : (lastTileElementType == 0x4E ? 1 : 4)}`)
+            // const layer_name_length = this.bytes[p += (lastTileElementType == 0x4E ? 1 : 4)]
             p += 3;
 
             let layer_name = ''
@@ -66,7 +70,7 @@ export class tBINTiles {
                 layer_name += String.fromCharCode(this.bytes[++p])
             }
 
-            console.log(`layer ${i}. name length: ${layer_name_length} - name: ${layer_name}. name finished at ${p} (0x${p.toString(16)})`)
+            console.log(`layer ${i}. name length: ${layer_name_length} - name: ${layer_name}. name finished at ${p} (0x${p.toString(16)}). lasttileementtype: ${lastTileElementType}`)
 
             let layer_visible = this.bytes[++p] > 0
             let layer_width_in_tiles = this.bytes[p += 5]
@@ -79,8 +83,6 @@ export class tBINTiles {
             
             p += 3
             if (layer_property_count > 0) {
-                
-
                 propertyLoop: for (let j = 0; j < layer_property_count; j++) {
                     const key_len = this.bytes[++p]
                     console.log(key_len, p, p.toString(16))
@@ -156,7 +158,7 @@ export class tBINTiles {
             let currentSheet = ''
 
             /* https://github.com/mapeditor/tiled/blob/4ee592fd4c8bc5015614f42cd52c20e259326483/src/plugins/tbin/tbin/Map.cpp#L222 was immesenly helpful as a reference for this. */
-            for (let y = 0; y < layer_height_in_tiles; y++) {
+            layerHeightLoop: for (let y = 0; y < layer_height_in_tiles; y++) {
                 if (!tiles[y]) tiles[y] = []
                 let x = 0;
                 // for (let x = 0; x < layer_width_in_tiles; x++) {
@@ -165,6 +167,7 @@ export class tBINTiles {
                     const tileType = this.bytes[++p]
                     lastTileElementType = tileType as any
                     if (!tiles[y][x]) tiles[y][x] = null
+                    lastElementHadProperties = false
                     switch (tileType) {
                         case 0x54: // 'T'
                             const sheet_name_len = this.bytes[++p]
@@ -186,6 +189,7 @@ export class tBINTiles {
                             
                             const prop_count = this.bytes[++p]
                             if (prop_count > 0) {
+                                lastElementHadProperties = true
                                 // need to figure out ones with multiple properties
                                 const key_len = this.bytes[p += 4]
                                 p += 3
@@ -227,11 +231,15 @@ export class tBINTiles {
                             
                             const a_tile = new tBINAnimatedTile(interval, frame_count)
                             
-                            for (let t = 0; t < frame_count;) {
+                            fcLoop: for (let t = 0; t < frame_count;) {
                                 switch (this.bytes[++p]) {
                                     default: // AAAAAAAA
                                         case 0x54: // 'T'
                                             const sheet_name_len = this.bytes[++p]
+                                            if (sheet_name_len == undefined) {
+                                                console.error(`animated tile ran into infinte loop - p: ${p}, t: ${t}, frame_count; ${frame_count}`)
+                                                continue layerHeightLoop;
+                                            }
                                             currentTilesheet_anim = ''
                                             p += 3;
                                             

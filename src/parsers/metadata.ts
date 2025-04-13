@@ -10,6 +10,7 @@ export class tBINMeta {
 
     constructor(private bytes: Uint16Array) {
         this.selfMapNameLength = this.bytes[6]
+        console.log(this.bytes)
         if (this.selfMapNameLength > 0) {
             this.selfMapName = ''
             for (let i = 0; i < this.selfMapNameLength; i++) {
